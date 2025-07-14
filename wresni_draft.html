@@ -1,0 +1,270 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wresni Villa Rental</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      line-height: 1.6;
+      color: #333;
+    }
+    nav {
+      background: #d3d3d3;
+      padding: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .menu-toggle {
+      display: block;
+      cursor: pointer;
+      color: #333;
+      font-size: 1.5em;
+      text-align: right;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+    .menu {
+      display: none;
+      list-style: none;
+      text-align: center;
+    }
+    .menu.active {
+      display: block;
+    }
+    .menu li {
+      margin: 10px 0;
+    }
+    .menu li a {
+      color: #333;
+      text-decoration: none;
+      font-size: 1em;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+    .hero {
+      text-align: center;
+      padding: 20px;
+      background: url('Generated Image July 14, 2025 - 7_47AM.jpeg') no-repeat center/cover;
+      color: white;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .hero h1 {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5); 
+    }
+    .hero p {
+      font-size: 1em;
+      margin-bottom: 15px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+    .hero .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 5px;
+    }
+    .section {
+      padding: 20px;
+      text-align: center;
+    }
+    .section h2 {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+    .villas img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .testimonials p {
+      font-style: italic;
+      margin: 10px 0;
+    }
+    .cta {
+      background: #28a745;
+      color: white;
+      padding: 20px;
+    }
+    .cta .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: white;
+      color: #28a745;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    footer {
+      background: #d3d3d3;
+      padding: 15px;
+      text-align: center;
+      color: #333;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+    footer p {
+      margin: 5px 0;
+    }
+    @media (min-width: 768px) {
+      .menu-toggle {
+        display: none;
+      }
+      .menu {
+        display: flex;
+        justify-content: center;
+        flex-direction: row;
+      }
+      .menu li {
+        margin: 0 15px;
+      }
+      .hero h1 {
+        font-size: 2.5em;
+      }
+      .hero p {
+        font-size: 1.2em;
+      }
+      .villas {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .villas > div {
+        width: 45%;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        padding: 15px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+      }
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const menu = document.querySelector('.menu');
+      menuToggle.addEventListener('click', function() {
+        menu.classList.toggle('active');
+      });
+    });
+  </script>
+</head>
+<body>
+  <nav>
+    <div class="menu-toggle">☰</div>
+    <ul class="menu">
+      <li><a href="#beranda">Home</a></li>
+      <li><a href="#tentang-kami">About Us</a></li>
+      <li><a href="#villa-kami">Our Villas</a></li>
+      <li><a href="#layanan">Services</a></li>
+      <li><a href="#titip-properti">List Your Property</a></li>
+      <li><a href="#harga">Pricing</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#kontak">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="hero" id="beranda">
+    <h1>Wresni Villa Rental - An Exclusive Experience</h1>
+    <p>Your Home in Paradise, Affordably Yours</p>
+    <div>
+      <a href="#villa-kami" class="btn">View Our Villas</a>
+      <a href="#kontak" class="btn">Contact Us</a>
+    </div>
+  </div>
+
+  <div class="section" id="tentang-kami">
+    <h2>About Us</h2>
+    <p>We provide high-quality villas in Bali at competitive prices, integrating local culture and personal service.</p>
+  </div>
+
+  <div class="section" id="villa-kami">
+    <h2>Our Villas</h2>
+    <div class="villas">
+      <div>
+        <img src="Generated Image July 14, 2025 - 7_52AM.jpeg" alt="Villa 1">
+        <p>Villa in Ubud</p>
+      </div>
+      <div>
+        <img src="Generated Image July 14, 2025 - 7_50AM.jpeg" alt="Villa 2">
+        <p>Villa in Canggu</p>
+      </div>
+    </div>
+    <a href="#villa-kami" class="btn" style="display: inline-block; margin-top: 30px; background-color: #007bff; color: white;">View All</a>
+  </div>
+
+  <div class="section" id="layanan">
+    <h2>Services</h2>
+    <p>Flexible villa rentals, private chefs, cultural tours, and transparent pricing.</p>
+  </div>
+
+  <div class="section testimonials" id="testimoni">
+    <h2>Testimonials</h2>
+    <p>"An amazing stay, the staff was very friendly!" - Debby</p>
+  </div>
+
+  <div class="section cta" id="kontak">
+    <h2>Book Now!</h2>
+    <p>Book your dream villa in Bali today.</p>
+    <a href="whatsapp://send?phone=628123456789" class="btn">Contact Us</a>
+  </div>
+
+  <footer>
+    <p>Contact: info@wresnivilla.com | +62 812 3456 789</p>
+    <p>© 2025 Wresni Villa Rental. All rights reserved.</p>
+  </footer>
+</body>
+</html>
